@@ -6,6 +6,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import DBSCAN
+from scipy.spatial import KDTree
 
 
 # Cut scale bar from the image and make it binary
@@ -111,14 +112,69 @@ def annotate_image_with_labels(cluster_large_holes,original_img):
         center = np.mean(coords, axis=0).astype(int)
         x, y = center[0], center[1]
 
-        cv2.putText(original_img, str(label), (y, x), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color=255, thickness=2)
+        cv2.putText(original_img, str(label), (y, x),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5, color=255, thickness=2)
         
         centroids_x.append(center[0])
         centroids_y.append(center[1])
 
     # Display the annotated image
-    cv2.imshow('Annotated Image', original_img)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    # cv2.imshow('Annotated Image', original_img)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
 
     return centroids_x, centroids_y
+
+
+def nearest_neighbour_dist(cen_x,cen_y,pixel_len):
+    dots = np.column_stack((cen_x, cen_y))
+    tree = KDTree(dots)
+    distances, _ = tree.query(dots, k=7)
+    nearest_neighbor_distances = distances[:, 1]/pixel_len
+
+    return np.average(nearest_neighbor_distances)
+
+def switch_filename_to_coord_tuple(mydict):
+    '''
+    Takes average value of the five images from one grid, and save the avg
+    value in a dictionary. The key of the return dict is a tuple of the
+    coordinates of that grid.
+    
+    Args: a dict contains the map of data from previous step
+    
+    '''
+    temp_sum_dict = {}
+    count_img = {}
+    for img, value in mydict.items():
+        if (int(img[6]),int(img[4])) not in temp_sum_dict:
+            temp_sum_dict[(int(img[6]),int(img[4]))] = value
+            count_img[(int(img[6]),int(img[4]))] = 1
+        else:
+            temp_sum_dict[(int(img[6]),int(img[4]))] += value
+            count_img[(int(img[6]),int(img[4]))] += 1
+
+
+    dict_norm = {}
+    for img, value in temp_sum_dict.items():
+        dict_norm[img] = temp_sum_dict[img] / count_img[img]
+
+    return dict_norm
+
+
+def switch_dict_to_ndarray(mydict):
+    '''
+    Args: dict_norm from previous function
+    Returns: a np 2d array for later heatmap ploting
+    '''
+
+    my_array = np.zeros((4,5))
+    for i in range(len(my_array)):
+        for j in range(len(my_array[0])):
+            if (i+1,j+1) not in mydict:
+                print("no")
+                pass
+            else:
+                my_array[i][j] = mydict[(i+1,j+1)]
+
+    return my_array
+            
