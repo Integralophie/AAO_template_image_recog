@@ -45,7 +45,7 @@ def translate_pixel_to_nm(length_pixel, scale_bar_length):
         scale_bar_length: actual scale bar length from SEM
 
     Returns:
-        physical length of each pixel in nanometer  
+        number of pixels per nanometer
     '''
     return length_pixel / scale_bar_length
 
