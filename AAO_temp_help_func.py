@@ -132,7 +132,7 @@ def nearest_neighbour_dist(cen_x,cen_y,pixel_len):
     distances, _ = tree.query(dots, k=7)
     nearest_neighbor_distances = distances[:, 1]/pixel_len
 
-    return np.average(nearest_neighbor_distances)
+    return np.average(nearest_neighbor_distances), nearest_neighbor_distances
 
 def switch_filename_to_coord_tuple(mydict):
     '''
