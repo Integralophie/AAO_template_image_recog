@@ -178,3 +178,9 @@ def switch_dict_to_ndarray(mydict):
 
     return my_array
             
+def flatten_concatenation(matrix):
+    flat_list = []    
+    for row in matrix:
+        flat_list += row
+        
+    return flat_list
